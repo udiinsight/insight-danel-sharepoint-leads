@@ -2,7 +2,7 @@
 Contributors: insightmarketing
 Requires at least: 6.0
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 
 Sends leads from four WS Form forms to the Datafromsite Excel file on Danel's SharePoint, verifies each write, then deletes the lead from the site.
 
@@ -30,6 +30,9 @@ Field IDs are mapped in includes/class-mapper.php. Rebuilding or duplicating a f
 For reliable timing, run WP-Cron from a real system cron (every 5 minutes).
 
 == Changelog ==
+
+= 1.0.1 =
+* chore: no code change — verifies WP Pusher push-to-deploy on the dev site
 
 = 1.0.0 =
 * feat: queue, Graph delivery with read-back verification, verified delete, 48h expiry, alerts, status page

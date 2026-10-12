@@ -33,3 +33,4 @@ For reliable timing, run WP-Cron from a real system cron (every 5 minutes).
 
 = 1.0.0 =
 * feat: queue, Graph delivery with read-back verification, verified delete, 48h expiry, alerts, status page
+* fix: unambiguous ISO date (Excel read d/m/Y as US m/d), page URL and marketing consent from each form's own fields

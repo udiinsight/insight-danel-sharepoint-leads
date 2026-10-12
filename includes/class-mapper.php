@@ -13,8 +13,10 @@ class Insight_Danel_Mapper {
 
 	const FORMS = array(
 		9  => array(
-			'label'  => 'טופס כללי',
-			'fields' => array(
+			'label'   => 'טופס כללי',
+			'url'     => 153,
+			'consent' => 165,
+			'fields'  => array(
 				'שם מלא'      => 66,
 				'טלפון'       => 69,
 				'מייל'        => 68,
@@ -23,24 +25,30 @@ class Insight_Danel_Mapper {
 			),
 		),
 		14 => array(
-			'label'  => 'טופס לידים – מאמר',
-			'fields' => array(
+			'label'   => 'טופס לידים – מאמר',
+			'url'     => 150,
+			'consent' => 169,
+			'fields'  => array(
 				'שם מלא' => 143,
 				'טלפון'  => 144,
 				'מייל'   => 145,
 			),
 		),
 		10 => array(
-			'label'  => 'טופס גיוס מטפלת',
-			'fields' => array(
+			'label'   => 'טופס גיוס מטפלת',
+			'url'     => 156,
+			'consent' => 0,
+			'fields'  => array(
 				'שם מלא'     => 76,
 				'טלפון'      => 77,
 				'עיר מגורים' => 80,
 			),
 		),
 		13 => array(
-			'label'  => 'מחשבון זכאות',
-			'fields' => array(
+			'label'   => 'מחשבון זכאות',
+			'url'     => 162,
+			'consent' => 133,
+			'fields'  => array(
 				'שם מלא' => 139,
 				'טלפון'  => 140,
 				'מייל'   => 141,
@@ -77,14 +85,18 @@ class Insight_Danel_Mapper {
 	public static function rows( $submit, $uuid ) {
 		$form_id = (int) $submit->form_id;
 		$cfg     = self::FORMS[ $form_id ];
-		$date    = wp_date( 'd/m/Y H:i', strtotime( $submit->date_added . ' UTC' ) );
+		// ISO order: Excel reads d/m/Y as US m/d and would swap day and month.
+		$date    = wp_date( 'Y-m-d H:i', strtotime( $submit->date_added . ' UTC' ) );
 
 		$lead = array(
 			self::ID_COLUMN => $uuid,
 			'תאריך ושעה'    => $date,
 			'טופס'          => $cfg['label'],
-			'עמוד מקור'     => self::source_url( $submit, $form_id ),
+			'עמוד מקור'     => self::source_url( $submit, $cfg ),
 		);
+		if ( $cfg['consent'] ) {
+			$lead['אישור דיוור'] = '' !== self::field( $submit, $cfg['consent'] ) ? 'כן' : 'לא';
+		}
 		foreach ( $cfg['fields'] as $header => $field_id ) {
 			$lead[ $header ] = self::field( $submit, $field_id );
 		}
@@ -97,7 +109,6 @@ class Insight_Danel_Mapper {
 		if ( 13 === $form_id ) {
 			$result                      = self::field( $submit, 104 );
 			$lead['תוצאת בדיקת זכאות']   = self::ELIGIBILITY_RESULT[ $result ] ?? $result;
-			$lead['אישור דיוור']          = '' !== self::field( $submit, 133 ) ? 'כן' : 'לא';
 
 			$elig = array(
 				self::ID_COLUMN => $uuid,
@@ -119,12 +130,10 @@ class Insight_Danel_Mapper {
 		return $rows;
 	}
 
-	private static function source_url( $submit, $form_id ) {
-		if ( 13 === $form_id ) {
-			$url = self::field( $submit, 162 );
-			if ( '' !== $url ) {
-				return $url;
-			}
+	private static function source_url( $submit, $cfg ) {
+		$url = self::field( $submit, $cfg['url'] );
+		if ( '' !== $url ) {
+			return $url;
 		}
 		$post_id = (int) self::text( self::raw( $submit, 'post_id' ) );
 		$url     = $post_id ? get_permalink( $post_id ) : '';

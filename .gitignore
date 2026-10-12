@@ -1,0 +1,14 @@
+# Release builds
+dist/
+
+# Secrets — never commit
+*secret*
+*.pem
+*.pfx
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

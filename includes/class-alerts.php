@@ -20,8 +20,10 @@ class Insight_Danel_Alerts {
 		if ( $throttle > 0 && isset( $sent[ $key ] ) && $sent[ $key ] > time() - $throttle ) {
 			return;
 		}
-		$sent[ $key ] = time();
-		update_option( self::OPTION, $sent, false );
+		if ( $throttle > 0 ) {
+			$sent[ $key ] = time();
+			update_option( self::OPTION, $sent, false );
+		}
 
 		$lines[] = '';
 		$lines[] = 'Status page: ' . admin_url( 'tools.php?page=insight-danel-leads' );

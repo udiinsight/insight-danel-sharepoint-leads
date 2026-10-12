@@ -11,6 +11,9 @@ class Insight_Danel_Mapper {
 
 	const ID_COLUMN = 'מזהה פנייה';
 
+	/** Excel's cell limit is 32,767 characters; longer values are rejected with a 400. */
+	const MAX_CELL = 32000;
+
 	const FORMS = array(
 		9  => array(
 			'label'   => 'טופס כללי',
@@ -166,6 +169,14 @@ class Insight_Danel_Mapper {
 			);
 			$value = implode( ', ', $flat );
 		}
-		return trim( html_entity_decode( wp_strip_all_tags( (string) $value ), ENT_QUOTES, 'UTF-8' ) );
+		$value = trim( html_entity_decode( wp_strip_all_tags( (string) $value ), ENT_QUOTES, 'UTF-8' ) );
+		$value = mb_substr( $value, 0, self::MAX_CELL );
+
+		// Excel would run "=..." (and "+ - @" starts) as a formula. A leading apostrophe makes it
+		// literal text and is not stored. The columns are also text-formatted; this covers any cell that isn't.
+		if ( '' !== $value && false !== strpos( "=+-@\t\r", $value[0] ) ) {
+			$value = "'" . $value;
+		}
+		return $value;
 	}
 }

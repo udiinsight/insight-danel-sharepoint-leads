@@ -2,7 +2,7 @@
 Contributors: insightmarketing
 Requires at least: 6.0
 Requires PHP: 8.0
-Stable tag: 1.0.2
+Stable tag: 1.1.0
 
 Sends leads from four WS Form forms to the Datafromsite Excel file on Danel's SharePoint, verifies each write, then deletes the lead from the site.
 
@@ -30,6 +30,18 @@ Field IDs are mapped in includes/class-mapper.php. Rebuilding or duplicating a f
 For reliable timing, run WP-Cron from a real system cron (every 5 minutes).
 
 == Changelog ==
+
+= 1.1.0 =
+* fix: values starting with = + - @ are stored as literal text, never as Excel formulas; cells capped at 32,000 chars
+* fix: a missing/renamed Excel column stops delivery with an alert instead of silently dropping data
+* fix: leads are expired after 48h only if genuinely tried several times, and never if already in Excel
+* fix: duplicates are reported, not deleted by row position
+* feat: orphan sweep queues submissions that never reached the queue (since plugin install only)
+* feat: alert when leads wait over 30 minutes (e.g. WP-Cron not running)
+* fix: transient read errors retry instead of failing permanently; delete is verified
+* fix: the empty first row is only filled before the first verified write
+* fix: data errors (400) get their own alert; ambiguous writes wait 5 minutes before re-checking
+* fix: the worker stops if it loses its database lock; queue rows unique per submission
 
 = 1.0.2 =
 * fix: worker re-checks the queue before finishing, so leads arriving during a run are not left for the next cron tick

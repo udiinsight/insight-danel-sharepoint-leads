@@ -133,9 +133,14 @@ class Insight_Danel_Graph {
 		return in_array( $res['code'], array( 409, 423 ), true ) || false !== stripos( $res['error'], 'accessConflict' ) || false !== stripos( $res['error'], 'resourceLocked' );
 	}
 
-	/** Permission, auth or addressing problem that needs a human to fix. */
+	/** Permission, auth, addressing or file-structure problem that needs a human to fix. 422 = Excel columns missing. */
 	public static function is_config_error( $res ) {
 		$token_error = 0 === strpos( $res['error'], 'token_' ) && 0 !== strpos( $res['error'], 'token_transport' );
-		return in_array( $res['code'], array( 400, 401, 403, 404 ), true ) || $token_error;
+		return in_array( $res['code'], array( 401, 403, 404, 422 ), true ) || $token_error;
+	}
+
+	/** Microsoft rejected the request content (bad value, filtered table, protected sheet). */
+	public static function is_data_error( $res ) {
+		return 400 === $res['code'];
 	}
 }

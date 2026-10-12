@@ -138,22 +138,30 @@ class Insight_Danel_Queue {
 		$started   = time();
 		$processed = 0;
 		try {
-			$items = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT * FROM ' . self::table() . " WHERE status IN ('pending','blocked') AND next_attempt_at <= %s ORDER BY id ASC LIMIT %d",
-					current_time( 'mysql', true ),
-					self::BATCH
-				)
-			);
-			foreach ( $items as $item ) {
-				if ( time() - $started > self::TIME_BUDGET ) {
-					break;
+			// Re-query until nothing is due: leads that arrive while this run holds the lock
+			// would otherwise wait for the next cron tick.
+			do {
+				$items = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT * FROM ' . self::table() . " WHERE status IN ('pending','blocked') AND next_attempt_at <= %s ORDER BY id ASC LIMIT %d",
+						current_time( 'mysql', true ),
+						self::BATCH
+					)
+				);
+				foreach ( $items as $item ) {
+					if ( time() - $started > self::TIME_BUDGET ) {
+						break 2;
+					}
+					self::process_item( $item );
+					++$processed;
 				}
-				self::process_item( $item );
-				++$processed;
-			}
+			} while ( $items );
 		} finally {
 			$wpdb->query( "SELECT RELEASE_LOCK('insight_danel_leads')" );
+		}
+
+		if ( time() - $started > self::TIME_BUDGET && ! wp_next_scheduled( self::RUN_HOOK ) ) {
+			wp_schedule_single_event( time(), self::RUN_HOOK );
 		}
 		return array( 'processed' => $processed );
 	}

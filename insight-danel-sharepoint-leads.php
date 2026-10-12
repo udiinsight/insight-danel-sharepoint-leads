@@ -3,7 +3,7 @@
  * Plugin Name: Insight - Danel - SharePoint Leads
  * Plugin URI: https://github.com/udiinsight/insight-danel-sharepoint-leads
  * Description: Sends WS Form leads to the Datafromsite Excel file on Danel's SharePoint via Microsoft Graph, verifies each write, then deletes the lead from the site.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Insight Marketing
  * Author URI: https://insight-marketing.co.il
  * Text Domain: insight-danel-sharepoint-leads
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'INSIGHT_DANEL_LEADS_VERSION', '1.0.1' );
+define( 'INSIGHT_DANEL_LEADS_VERSION', '1.0.2' );
 define( 'INSIGHT_DANEL_LEADS_DIR', plugin_dir_path( __FILE__ ) );
 
 if ( ! defined( 'DANEL_GRAPH_SECRET_EXPIRES' ) ) {
